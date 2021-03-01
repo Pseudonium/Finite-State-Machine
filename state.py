@@ -22,37 +22,42 @@ class FiniteStateMachine:
     def __init__(self, sequence: str):
         self.nodes = [
             {
-                "name": "$",
+                "name": "$", # Using $ to represent the empty string
                 "arrows": dict()
             }
         ]
         for i in range(len(sequence)):
             self.nodes.append(
                 {
-                    "name": sequence[:i + 1],
+                    "name": sequence[:i + 1], # So that we skip over empty
                     "arrows": dict()
                 }
             )
 
     def compute_connections(self):
         for index, node in enumerate(self.nodes[:-1]):
+            # Don't need connections for the last node, since that's the end!
             if node["name"] == "$":
                 name = ""
+                # Using $ to represent the empty string
             else:
                 name = node["name"]
             for outcome in self.ALPHABET:
-                modified = name + outcome
-                offset = 1
+                modified = name + outcome # What the next sequence would read
+                offset = 1 # Initially want to get to next node
                 finished = False
                 while index + offset > 0 and not finished:
+                    # Index + offset > 0 means we can still access a node
                     if modified == self.nodes[index + offset]["name"]:
                         node["arrows"][outcome] = index + offset
                         finished = True
                     else:
                         modified = modified[1:]
-                        offset -= 1
-                if not finished:
-                    node["arrows"][outcome] = 0
+                        # We ignore the first letter of modified, to see
+                        # If we're partway through a different match
+                        offset -= 1 # Look at the previous node
+                if not finished: # I.e. never found a matching node
+                    node["arrows"][outcome] = 0 # Back to the start
 
     def __repr__(self):
         result = ""
