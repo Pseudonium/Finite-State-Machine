@@ -22,7 +22,7 @@ class FiniteStateMachine:
     def __init__(self, sequence: str):
         self.nodes = [
             {
-                "name": "$", # Using $ to represent the empty string
+                "name": "START", # Using START to represent the empty string
                 "arrows": dict()
             }
         ]
@@ -33,11 +33,12 @@ class FiniteStateMachine:
                     "arrows": dict()
                 }
             )
+        self.compute_connections()
 
     def compute_connections(self):
         for index, node in enumerate(self.nodes[:-1]):
             # Don't need connections for the last node, since that's the end!
-            if node["name"] == "$":
+            if node["name"] == "START":
                 name = ""
                 # Using $ to represent the empty string
             else:
@@ -60,7 +61,6 @@ class FiniteStateMachine:
                     node["arrows"][outcome] = 0 # Back to the start
 
     def expected_time(self):
-        self.compute_connections()
         # Let T_n be the expected time taken to reach node n from the start
         # So, T_0 = 0, and want to find e.g. T_m
         # Well, what's the recurrence relation?
@@ -82,11 +82,28 @@ class FiniteStateMachine:
 
     def __repr__(self):
         result = ""
+        # Start listing the states:
+        result += "#states\n"
         for node in self.nodes:
             result += node["name"] + "\n"
+        result += "#initial\nSTART\n"
+        result += "#accepting\n" + self.nodes[-1]["name"] + "\n"
+        # Now the alphabet
+        result += "#alphabet\nh\nt\n"
+        # Now the transitions
+        result += "#transitions\n"
+        for node in self.nodes:
             for outcome, pointer in node["arrows"].items():
-                result += outcome + ":" + self.nodes[pointer]["name"] + "\n"
+                result += "".join([
+                    node["name"],
+                    ":",
+                    outcome.lower(),
+                    ">",
+                    self.nodes[pointer]["name"],
+                    "\n"
+                ])
         return result
 
-y = FiniteStateMachine("THTHTTHT")
+y = FiniteStateMachine("HTHH")
+print(y)
 print(y.expected_time())
